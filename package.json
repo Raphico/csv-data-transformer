@@ -1,0 +1,23 @@
+{
+    "name": "csv-data-transformer",
+    "version": "1.0.0",
+    "description": "A CLI tool to process and transform large CSV files by filtering, aggregating, or restructuring data.",
+    "main": "src/csv-transform-cli.js",
+    "scripts": {
+        "test": "vitest"
+    },
+    "bin": {
+        "csvtransform": "./src/csv-transform-cli.js"
+    },
+    "author": {
+        "name": "Raphico",
+        "url": "https://github.com/raphico"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "minimist": "^1.2.8"
+    },
+    "devDependencies": {
+        "vitest": "^2.1.4"
+    }
+}
