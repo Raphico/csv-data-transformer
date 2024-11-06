@@ -6,6 +6,7 @@
     "scripts": {
         "test": "vitest"
     },
+    "type": "module",
     "bin": {
         "csvtransform": "./src/csv-transform-cli.js"
     },
