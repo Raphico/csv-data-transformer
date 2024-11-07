@@ -10,7 +10,7 @@ Options:
   --output <filePath>                       Specify the output file path and format (.csv or .json).
 
   --filter <condition>                      Filter rows based on a condition (e.g., column=value).
-                                            Example: --filter "status=active" --filter "status=active AND sales=100"
+                                            Example: --filter "status=active", --filter "status=active AND sales=100", --filter "status=active OR country=USA"
 
   --aggregate <type,column>                 Perform aggregation operations on a column.
                                             Available types: sum, average, min, max
@@ -33,7 +33,7 @@ Options:
 
 Examples:
   1. Basic usage with filtering and output:
-     csv-transform --input data.csv --filter "status=active AND sales=100" --output result.csv
+     csv-transform --input data.csv --filter "status=active AND country=USA" --output result.csv
 
   2. Add a new column and aggregate sales:
      csv-transform --input data.csv --add-column "discount=5" --aggregate "sum,sales" --output summary.json
@@ -51,7 +51,7 @@ Examples:
  * @param {boolean} showHelpCommand - display help command
  */
 export function printError(errorMessage, showHelpCommand = true) {
-    console.error(errorMessage);
+    console.error(`csvtransform: ${errorMessage}`);
     if (showHelpCommand) {
         console.error("Try 'bfr --help' for more information.");
     }

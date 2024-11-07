@@ -3,11 +3,8 @@
 import * as readline from "node:readline/promises";
 import fs from "node:fs";
 import { isEmpty } from "./utils/is-empty.js";
-import {
-    extractKeyPair,
-    isValidKeyPairOption,
-} from "./utils/is-valid-key-pair-option.js";
 import { printError } from "./utils/help.js";
+import { applyFilter, isValidFilterValue } from "./filter.js";
 
 export async function processCSV(argv) {
     const inputStream = fs.createReadStream(argv.input);
@@ -29,42 +26,19 @@ export async function processCSV(argv) {
         }
 
         if (argv.filter && !isEmpty(argv.filter)) {
-            const shouldIncludeLine = applyFilter(
-                argv.filter,
+            if (!isValidFilterValue(argv.filter, headers)) {
+                printError("invalid filter value or field not found");
+                return;
+            }
+
+            const shouldIncludeLine = applyFilter({
+                filterValue: argv.filter,
                 headers,
                 line,
-                argv.delimiter
-            );
+                delimiter: argv.delimiter,
+            });
+
             shouldIncludeLine && outStream.write(`${line}\n`);
         }
     }
-}
-
-function applyFilter(filterCondition, headers, line, delimiter) {
-    const validationStatus = isValidKeyPairOption({
-        option: filterCondition,
-        allowedKeys: headers,
-    });
-    if (validationStatus == 1) {
-        printError("csvtransform: invalid filter option");
-        return;
-    }
-
-    if (validationStatus == 2) {
-        printError("csvtransform: field not found", false);
-        return;
-    }
-
-    const record = line.split(delimiter);
-
-    const parsedConditions = filterCondition
-        .split(" AND ")
-        .map(function (param) {
-            const [_, key, value] = extractKeyPair(param);
-            const fieldIndex = headers.findIndex((header) => header === key);
-
-            return record[fieldIndex] === value;
-        });
-
-    return parsedConditions.every(Boolean);
 }

@@ -47,24 +47,24 @@ const argv = minimist(hideBin(process.argv), {
 
     if (containsNecessaryOptions(argv)) {
         processCSV(argv).catch((error) => {
-            printError(`csvtransform: ${error.message}`, false);
+            printError(`${error.message}`, false);
         });
     }
 })(argv);
 
 function containsNecessaryOptions(argv) {
     if (isEmpty(argv.input ?? "") || isEmpty(argv.output ?? "")) {
-        printError("csvtransform: missing input or output operand");
+        printError("missing input or output operand");
         return false;
     }
 
     if (!isValidFile(argv.input) || !isValidCSVFile(argv.input)) {
-        printError("csvtransform: input file not found or not a csv file");
+        printError("input file not found or not a csv file");
         return false;
     }
 
     if (!isValidJSONFile(argv.output) && !isValidCSVFile(argv.output)) {
-        printError("csvtransform: output file must be csv or json format");
+        printError("output file must be csv or json format");
         return false;
     }
 

@@ -39,14 +39,14 @@ csvtransform --help
 
 ## Commands
 
-| Command                                   | Description                                                    | Example                             |
-| ----------------------------------------- | -------------------------------------------------------------- | ----------------------------------- |
-| `--input <filePath>`                      | Specifies the CSV file to process.                             | `--input data.csv`                  |
-| `--output <filePath>`                     | Specifies the output file path and format (`.csv` or `.json`). | `--output result.json`              |
-| `--filter <condition>`                    | Filters rows based on a condition (e.g., `column=value`).      | `--filter "status=active"`          |
-| `--aggregate <type,column>`               | Aggregates data, e.g., `sum`, `average` on a column.           | `--aggregate "sum,sales"`           |
-| `--add-column <columnName=defaultValue>`  | Adds a new column with a default value.                        | `--add-column "discount=0"`         |
-| `--remove-column <columnName>`            | Removes a specified column.                                    | `--remove-column "old_column"`      |
-| `--rename-column <oldName=newName>`       | Renames a column.                                              | `--rename-column "old_col=new_col"` |
-| `--modify-column <columnName,expression>` | Modifies column values by expression.                          | `--modify-column "price,*1.2"`      |
-| `--delimiter <character>`                 | Specifies the CSV delimiter (default is a comma).              | `--delimiter ";"`                   |
+| Command                                   | Description                                                    | Example                                                                                                      |
+| ----------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `--input <filePath>`                      | Specifies the CSV file to process.                             | `--input data.csv`                                                                                           |
+| `--output <filePath>`                     | Specifies the output file path and format (`.csv` or `.json`). | `--output result.json`                                                                                       |
+| `--filter <condition>`                    | Filters rows based on a condition (e.g., `column=value`).      | `--filter "status=active", --filter "status=active OR country=USA", --filter "status=active AND country=USA` |
+| `--aggregate <type,column>`               | Aggregates data, e.g., `sum`, `average` on a column.           | `--aggregate "sum,sales"`                                                                                    |
+| `--add-column <columnName=defaultValue>`  | Adds a new column with a default value.                        | `--add-column "discount=0"`                                                                                  |
+| `--remove-column <columnName>`            | Removes a specified column.                                    | `--remove-column "old_column"`                                                                               |
+| `--rename-column <oldName=newName>`       | Renames a column.                                              | `--rename-column "old_col=new_col"`                                                                          |
+| `--modify-column <columnName,expression>` | Modifies column values by expression.                          | `--modify-column "price,*1.2"`                                                                               |
+| `--delimiter <character>`                 | Specifies the CSV delimiter (default is a comma).              | `--delimiter ";"`                                                                                            |
