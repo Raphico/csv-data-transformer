@@ -1,6 +1,12 @@
 "use strict";
 
 /**
+ * @typedef {Object} Option
+ * @property {string} option - The option condition specified by the user in the format "key=string" or with multiple conditions separated by "AND"
+ * @property {string[] | undefined} allowedKeys - An array of valid keys
+ */
+
+/**
  * validates a key-value option
  *
  * This function checks that an option string follows the correct syntax
@@ -8,12 +14,11 @@
  * allowed keys (e.g., CSV headers or other allowed fields), and optionally,
  * that the values meet specific requirements.
  *
- * @param {string} option - The option condition specified by the user in the format "key=string" or with multiple conditions separated by "AND"
- * @param {string[]} allowedKeys - An array of valid keys defined by the csv header
+ * @param {Option} - option
  * @returns {0 | 1 | 2} - returns 1 if option is invalid, 2 if option is not in allowed keys, and 0 if valid
  */
-export function isValidKeyPairOption(option, allowedKeys) {
-    if (!option || !allowedKeys) {
+export function isValidKeyPairOption({ option, allowedKeys }) {
+    if (!option) {
         throw new Error("invalid arguments");
     }
 
@@ -28,7 +33,7 @@ export function isValidKeyPairOption(option, allowedKeys) {
 
         const [_, key] = match;
 
-        if (!allowedKeys.includes(key)) {
+        if (allowedKeys && !allowedKeys.includes(key)) {
             return 2;
         }
     }

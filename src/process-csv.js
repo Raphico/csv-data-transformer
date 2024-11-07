@@ -1,3 +1,5 @@
+"use strict";
+
 import * as readline from "node:readline/promises";
 import fs from "node:fs";
 import { isEmpty } from "./utils/is-empty.js";
@@ -27,29 +29,42 @@ export async function processCSV(argv) {
         }
 
         if (argv.filter && !isEmpty(argv.filter)) {
-            const shouldIncludeLine = applyFilter(argv.filter, headers, line);
-            if (shouldIncludeLine) {
-                outStream.write(`${line}\n`);
-            }
+            const shouldIncludeLine = applyFilter(
+                argv.filter,
+                headers,
+                line,
+                argv.delimiter
+            );
+            shouldIncludeLine && outStream.write(`${line}\n`);
         }
     }
 }
 
-function applyFilter(filter, headers, line) {
-    const result = isValidKeyPairOption(filter, headers);
-    if (result == 1) {
+function applyFilter(filterCondition, headers, line, delimiter) {
+    const validationStatus = isValidKeyPairOption({
+        option: filterCondition,
+        allowedKeys: headers,
+    });
+    if (validationStatus == 1) {
         printError("csvtransform: invalid filter option");
         return;
     }
 
-    if (result == 2) {
+    if (validationStatus == 2) {
         printError("csvtransform: field not found", false);
         return;
     }
 
-    const [_, key, value] = extractKeyPair(filter);
-    const fieldIndex = headers.findIndex((header) => header === key);
+    const record = line.split(delimiter);
 
-    const shouldIncludeLine = line.split(",")[fieldIndex] === value;
-    return shouldIncludeLine;
+    const parsedConditions = filterCondition
+        .split(" AND ")
+        .map(function (param) {
+            const [_, key, value] = extractKeyPair(param);
+            const fieldIndex = headers.findIndex((header) => header === key);
+
+            return record[fieldIndex] === value;
+        });
+
+    return parsedConditions.every(Boolean);
 }
