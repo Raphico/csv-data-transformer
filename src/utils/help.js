@@ -31,9 +31,6 @@ Options:
   --delimiter <character>                   Specify the delimiter used in the CSV file (default is comma).
                                             Example: --delimiter ";"
 
-  --header                                  Indicates that the first row of the CSV file is a header row (default is true).
-                                            To disable headers, use: --no-header
-
 Examples:
   1. Basic usage with filtering and output:
      csv-transform --input data.csv --filter "status=active" --output result.csv

@@ -50,4 +50,3 @@ csvtransform --help
 | `--rename-column <oldName=newName>`       | Renames a column.                                              | `--rename-column "old_col=new_col"` |
 | `--modify-column <columnName,expression>` | Modifies column values by expression.                          | `--modify-column "price,*1.2"`      |
 | `--delimiter <character>`                 | Specifies the CSV delimiter (default is a comma).              | `--delimiter ";"`                   |
-| `--header`                                | Indicates the first row is a header (`--no-header` for false). | `--header`                          |
