@@ -1,7 +1,7 @@
 "use client";
 
 import { describe, expect, test } from "vitest";
-import { isValidFilterValue } from "../src/filter.js";
+import { isValidFilterValue } from "../src/process-csv.js";
 
 describe("isValidFilterValue", () => {
     const headers = ["name", "status", "country", "sales"];
