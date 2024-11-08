@@ -15,23 +15,31 @@ export async function processCSV(argv) {
     });
 
     let isHeader = true,
+        noTransformation = false,
         isFilterValid,
         columnToRemoveIndex,
         isNewColumnValid,
-        noTransformation = false;
-    let headers;
+        isRenameValid,
+        headers;
 
     for await (let line of rl) {
         if (isHeader) {
             headers = line.split(",");
             isHeader = false;
 
-            [isFilterValid, columnToRemoveIndex, isNewColumnValid] =
-                validateOptions(argv, headers);
+            [
+                isFilterValid,
+                isRenameValid,
+                columnToRemoveIndex,
+                isNewColumnValid,
+            ] = validateOptions(argv, headers);
 
             if (isFilterValid === false) {
                 printError("invalid filter value or column not found");
                 return;
+            }
+            if (isRenameValid === false) {
+                printError("invalid rename or column not found");
             }
             if (columnToRemoveIndex === -1) {
                 printError("column not found");
@@ -44,14 +52,23 @@ export async function processCSV(argv) {
 
             if (columnToRemoveIndex > -1)
                 headers.splice(columnToRemoveIndex, 1);
+            if (isRenameValid) {
+                const [, key, value] = parseKeyValuePair(argv["rename-column"]);
+                headers = headers.map(function renameHeader(header) {
+                    return header === key ? value : header;
+                });
+            }
             if (isNewColumnValid) {
                 const [, key] = parseKeyValuePair(argv["add-column"]);
                 headers = [...headers, key];
             }
 
-            noTransformation =
-                isFilterValid === undefined &&
-                columnToRemoveIndex === undefined;
+            noTransformation = [
+                isFilterValid,
+                isRenameValid,
+                columnToRemoveIndex,
+                isNewColumnValid,
+            ].every((value) => value === undefined);
 
             outStream.write(`${headers.join(",")}\n`);
 
@@ -92,11 +109,18 @@ export async function processCSV(argv) {
     }
 }
 
-export function validateOptions(argv, headers) {
-    let isFilterValid, columnToRemoveIndex, isNewColumnValid;
+function validateOptions(argv, headers) {
+    let isFilterValid, columnToRemoveIndex, isNewColumnValid, isRenameValid;
 
     if (argv.filter && !isEmpty(argv.filter)) {
         isFilterValid = isValidFilterValue(argv.filter, headers);
+    }
+
+    if (argv["rename-column"] && !isEmpty(argv["rename-column"])) {
+        isRenameValid = !validateOption({
+            value: argv["rename-column"],
+            allowedKeys: headers,
+        });
     }
 
     if (argv["remove-column"] && !isEmpty(argv["remove-column"])) {
@@ -109,7 +133,12 @@ export function validateOptions(argv, headers) {
         isNewColumnValid = !validateOption({ value: argv["add-column"] });
     }
 
-    return [isFilterValid, columnToRemoveIndex, isNewColumnValid];
+    return [
+        isFilterValid,
+        isRenameValid,
+        columnToRemoveIndex,
+        isNewColumnValid,
+    ];
 }
 
 export function applyFilter({ filterValue, headers, line, delimiter }) {
