@@ -43,7 +43,6 @@ const argv = minimist(hideBin(process.argv), {
     if (hasNecessaryOptions(argv)) {
         processCSV(argv).catch((error) => {
             printError(`${error.message}`, false);
-            console.error(error);
         });
     }
 })(argv);

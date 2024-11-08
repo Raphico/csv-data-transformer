@@ -8,10 +8,13 @@ import { parseAggregateSyntax } from "./utils/validate-aggregate-expression.js";
 import { checkAndHandleError, validateOptions } from "./validate.js";
 import { applyFilter } from "./filter.js";
 import { updateAggregate } from "./aggregate.js";
+import { isValidJSONFile } from "./utils/check-file.js";
 
 export async function processCSV(argv) {
     const inputStream = fs.createReadStream(argv.input);
-    const outStream = fs.createWriteStream(argv.output);
+    let outStream = isValidJSONFile(argv.output)
+        ? []
+        : fs.createWriteStream(argv.output);
 
     const rl = readline.createInterface({
         input: inputStream,
@@ -84,7 +87,8 @@ export async function processCSV(argv) {
                 isAggregateValid,
             ].every((value) => value === undefined);
 
-            outStream.write(`${headers.join(argv.delimiter)}\n`);
+            !isValidJSONFile(argv.output) &&
+                outStream.write(`${headers.join(argv.delimiter)}\n`);
 
             continue;
         }
@@ -130,7 +134,28 @@ export async function processCSV(argv) {
             });
         }
 
-        outStream.write(`${line}\n`);
+        if (isValidJSONFile(argv.output)) {
+            const row = line.split(",");
+            const rowObject = headers.reduce(function getRowObject(
+                accumulator,
+                header,
+                index
+            ) {
+                accumulator[header] = row[index];
+                return accumulator;
+            },
+            {});
+            outStream = [...outStream, rowObject];
+        } else {
+            outStream.write(`${line}\n`);
+        }
+    }
+
+    if (isValidJSONFile(argv.output)) {
+        await fs.promises.writeFile(
+            argv.output,
+            JSON.stringify(outStream, null, 4)
+        );
     }
 
     if (noTransformation) {
