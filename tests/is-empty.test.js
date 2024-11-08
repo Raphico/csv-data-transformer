@@ -1,7 +1,7 @@
 "use strict";
 
 import { describe, expect, test } from "vitest";
-import { isEmpty } from "../src/utils/is-empty";
+import { isEmpty } from "../src/utils/is-empty.js";
 
 describe("isEmpty", () => {
     test("should return true if string is empty", () => {

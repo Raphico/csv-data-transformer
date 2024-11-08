@@ -6,14 +6,14 @@ Usage:
   csv-transform [options]
 
 Options:
-  --input <filePath>                        Specify the input CSV file.
-  --output <filePath>                       Specify the output file path and format (.csv or .json).
+  -i, --input <filePath>                    Specify the input CSV file.
+  -o, --output <filePath>                   Specify the output file path and format (.csv or .json).
 
-  --filter <condition>                      Filter rows based on a condition (e.g., column=value).
+  -f, --filter <condition>                  Filter rows based on a condition (e.g., column=value).
                                             Example: --filter "status=active", --filter "status=active AND sales=100", --filter "status=active OR country=USA"
 
-  --aggregate <type,column>                 Perform aggregation operations on a column.
-                                            Available types: sum, average, min, max
+  -a, --aggregate <type,column>                 Perform aggregation operations on a column.
+                                            Available types: sum, avg, min, max
                                             Example: --aggregate "sum,sales"
 
   --add-column <columnName=defaultValue>    Add a new column with a default value for each row.
@@ -25,10 +25,7 @@ Options:
   --rename-column <oldName=newName>         Rename a column.
                                             Example: --rename-column "old_col=new_col"
 
-  --modify-column <columnName,expression>   Modify column values based on an expression (e.g., adjust a value).
-                                            Example: --modify-column "price,*1.2" (multiplies "price" by 1.2)
-
-  --delimiter <character>                   Specify the delimiter used in the CSV file (default is comma).
+  -d, --delimiter <character>               Specify the delimiter used in the CSV file (default is comma).
                                             Example: --delimiter ";"
 
 Examples:

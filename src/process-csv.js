@@ -2,9 +2,12 @@
 
 import * as readline from "node:readline/promises";
 import fs from "node:fs";
-import { isEmpty } from "./utils/is-empty.js";
 import { printError } from "./utils/help.js";
-import { parseKeyValuePair, validateOption } from "./utils/validate-option.js";
+import { parseKeyValuePair } from "./utils/validate-option.js";
+import { parseAggregateSyntax } from "./utils/validate-aggregate-expression.js";
+import { checkAndHandleError, validateOptions } from "./validate.js";
+import { applyFilter } from "./filter.js";
+import { updateAggregate } from "./aggregate.js";
 
 export async function processCSV(argv) {
     const inputStream = fs.createReadStream(argv.input);
@@ -20,11 +23,17 @@ export async function processCSV(argv) {
         columnToRemoveIndex,
         isNewColumnValid,
         isRenameValid,
+        isAggregateValid,
+        aggregateColumnIndex,
+        aggregate = 0,
+        lineCount = 0,
+        aggregateType,
         headers;
 
     for await (let line of rl) {
+        lineCount++;
         if (isHeader) {
-            headers = line.split(",");
+            headers = line.split(argv.delimiter);
             isHeader = false;
 
             [
@@ -32,21 +41,18 @@ export async function processCSV(argv) {
                 isRenameValid,
                 columnToRemoveIndex,
                 isNewColumnValid,
+                isAggregateValid,
             ] = validateOptions(argv, headers);
 
-            if (isFilterValid === false) {
-                printError("invalid filter value or column not found");
-                return;
-            }
-            if (isRenameValid === false) {
-                printError("invalid rename or column not found");
-            }
-            if (columnToRemoveIndex === -1) {
-                printError("column not found");
-                return;
-            }
-            if (isNewColumnValid === false) {
-                printError("invalid '--add-column' option value");
+            if (
+                checkAndHandleError({
+                    isFilterValid,
+                    columnToRemoveIndex,
+                    isNewColumnValid,
+                    isRenameValid,
+                    isAggregateValid,
+                })
+            ) {
                 return;
             }
 
@@ -62,15 +68,23 @@ export async function processCSV(argv) {
                 const [, key] = parseKeyValuePair(argv["add-column"]);
                 headers = [...headers, key];
             }
+            if (isAggregateValid) {
+                const [, type, column] = parseAggregateSyntax(argv.aggregate);
+                aggregateType = type;
+                aggregateColumnIndex = headers.findIndex(
+                    (header) => header === column
+                );
+            }
 
             noTransformation = [
                 isFilterValid,
                 isRenameValid,
                 columnToRemoveIndex,
                 isNewColumnValid,
+                isAggregateValid,
             ].every((value) => value === undefined);
 
-            outStream.write(`${headers.join(",")}\n`);
+            outStream.write(`${headers.join(argv.delimiter)}\n`);
 
             continue;
         }
@@ -88,14 +102,32 @@ export async function processCSV(argv) {
 
         if (columnToRemoveIndex > -1) {
             line = line
-                .split(",")
+                .split(argv.delimiter)
                 .filter((_, index) => index != columnToRemoveIndex)
-                .join(",");
+                .join(argv.delimiter);
         }
 
         if (isNewColumnValid) {
             const [, , value] = parseKeyValuePair(argv["add-column"]);
-            line = `${line},${value}`;
+            line = `${line}${argv.delimiter}${value}`;
+        }
+
+        if (isAggregateValid) {
+            const field = Number(
+                line.split(argv.delimiter)[aggregateColumnIndex]
+            );
+            if (isNaN(field)) {
+                printError(
+                    `can't calculate ${aggregateType} aggregate on ${headers[aggregateColumnIndex]}`
+                );
+                return;
+            }
+            aggregate = updateAggregate({
+                aggregateType,
+                aggregate,
+                field,
+                lineCount,
+            });
         }
 
         outStream.write(`${line}\n`);
@@ -107,66 +139,10 @@ export async function processCSV(argv) {
         );
         console.log("Try 'bfr --help' for more information.");
     }
-}
 
-function validateOptions(argv, headers) {
-    let isFilterValid, columnToRemoveIndex, isNewColumnValid, isRenameValid;
-
-    if (argv.filter && !isEmpty(argv.filter)) {
-        isFilterValid = isValidFilterValue(argv.filter, headers);
+    if (isAggregateValid) {
+        aggregate =
+            aggregateType === "avg" ? aggregate / (lineCount - 1) : aggregate;
+        console.log(`aggregate: ${aggregate}`);
     }
-
-    if (argv["rename-column"] && !isEmpty(argv["rename-column"])) {
-        isRenameValid = !validateOption({
-            value: argv["rename-column"],
-            allowedKeys: headers,
-        });
-    }
-
-    if (argv["remove-column"] && !isEmpty(argv["remove-column"])) {
-        columnToRemoveIndex = headers.findIndex(
-            (header) => header === argv["remove-column"]
-        );
-    }
-
-    if (argv["add-column"] && !isEmpty(argv["add-column"])) {
-        isNewColumnValid = !validateOption({ value: argv["add-column"] });
-    }
-
-    return [
-        isFilterValid,
-        isRenameValid,
-        columnToRemoveIndex,
-        isNewColumnValid,
-    ];
-}
-
-export function applyFilter({ filterValue, headers, line, delimiter }) {
-    const record = line.split(delimiter);
-
-    const parsedConditions = filterValue.split(" OR ").map(function (segment) {
-        const parsedSegment = segment.split(" AND ").map(function (param) {
-            const [_, key, value] = parseKeyValuePair(param);
-            const fieldIndex = headers.findIndex((header) => header === key);
-
-            return record[fieldIndex] === value;
-        });
-
-        return parsedSegment.every(Boolean);
-    });
-
-    return parsedConditions.some(Boolean);
-}
-
-export function isValidFilterValue(filterValue, headers) {
-    const conditions = filterValue.split(/\s+(?:AND|OR)\s+/).filter(Boolean);
-
-    const result = conditions.reduce(function (accumulator, condition) {
-        return [
-            ...accumulator,
-            validateOption({ value: condition, allowedKeys: headers }),
-        ];
-    }, []);
-
-    return result.every((value) => value == 0);
 }
