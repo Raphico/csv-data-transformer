@@ -9,12 +9,6 @@ A Node.js CLI tool for transforming and processing large CSV files. Supports fil
 -   **Add, remove, or rename columns.**
 -   **Export** to CSV or JSON formats.
 
-## tools used
-
-1. node
-2. minimist
-3. vitest for testing
-
 ## Installation
 
 1. clone repository
