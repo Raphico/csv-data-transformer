@@ -1,5 +1,3 @@
-"use strict";
-
 import { printError } from "./utils/help.js";
 import { isEmpty } from "./utils/is-empty.js";
 import { isValidAggregateExpression } from "./utils/validate-aggregate-expression.js";

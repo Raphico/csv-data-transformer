@@ -1,5 +1,3 @@
-"use strict";
-
 import { describe, expect, test } from "vitest";
 import { validateOption } from "../src/utils/validate-option.js";
 

@@ -1,5 +1,3 @@
-"use strict";
-
 import * as readline from "node:readline/promises";
 import fs from "node:fs";
 import { printError } from "./utils/help.js";

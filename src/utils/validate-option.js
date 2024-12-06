@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * @typedef {Object} KeyValueOption
  * @property {string} value - The option string specified by the user, formatted as "key=value".

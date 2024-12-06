@@ -1,5 +1,3 @@
-"use strict";
-
 import { applyFilter } from "../src/filter.js";
 import { describe, test, expect } from "vitest";
 

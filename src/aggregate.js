@@ -1,5 +1,3 @@
-"use strict";
-
 export function updateAggregate({
     aggregateType,
     aggregate,

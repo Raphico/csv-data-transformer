@@ -1,5 +1,3 @@
-"use strict";
-
 import { parseKeyValuePair, validateOption } from "./utils/validate-option.js";
 
 export function applyFilter({ filterValue, headers, line, delimiter }) {

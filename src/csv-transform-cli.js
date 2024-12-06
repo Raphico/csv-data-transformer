@@ -1,7 +1,5 @@
 #! /usr/bin/env node
 
-"use strict";
-
 import minimist from "minimist";
 import { hideBin } from "./utils/hide-bin.js";
 import { printError, printHelp } from "./utils/help.js";

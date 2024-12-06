@@ -1,5 +1,3 @@
-"use strict";
-
 export function printHelp() {
     const help = `
 Usage:

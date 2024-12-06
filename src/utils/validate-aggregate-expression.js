@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * @typedef {Object} AggregateExpression
  * @property {string} formula - The calculation formula, e.g., 'sum,sales' or 'price,*1.2'.
